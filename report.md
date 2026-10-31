@@ -1,34 +1,34 @@
 # Report: Building AI Agents with LangGraph
 
 ## 1. Chain vs. agentic workflow
-A conventional LLM chain runs a fixed sequence of steps (prompt → model → parser), always in the same order. An agentic workflow lets the model decide at runtime: which branch to follow, whether to call a tool, whether to loop again or stop. LangGraph expresses this as a graph with a shared state, conditional edges and cycles.
+A normal LLM chain always runs the same steps in the same order (prompt, model, parser). In an agentic workflow the model takes decisions while it runs: which branch to take, whether to call a tool, whether to continue or stop. LangGraph lets us write this as a graph with a shared state, conditional edges and loops.
 
 ## 2. Conceptual questions
 
 ### Exercise 1: Role of each component
 1. LangChain
-   Answer: A framework of building blocks for LLM applications: a common interface to model providers, prompts, message types, tools, retrievers and output parsers. Good for linear pipelines where the steps are fixed.
+   Answer: The toolbox. One interface for the different LLM providers, plus prompts, messages, tools and parsers. Good when the steps are always the same.
 2. LangGraph
-   Answer: A library on top of LangChain that models an application as a graph of nodes sharing a state, with conditional edges, loops and persistence (checkpointers). Suited to agents that decide what to do next, call tools repeatedly and keep memory.
+   Answer: Built on LangChain. The application becomes a graph of nodes that update a shared state, with edges that can depend on a condition or loop back. The program can then decide at runtime what to do next, call tools several times and keep a memory.
 3. An LLM
-   Answer: The neural network that generates text from a prompt (here `gpt-4o-mini`). It is the reasoning part of the agent: it understands the question, classifies it, decides on tool calls and writes the answer.
+   Answer: The model that understands the question and generates the text (here gpt-4o-mini). In our agents it classifies the question, decides if a tool is needed and writes the answer.
 
 ### Exercise 2: Graph basics
 1. What is a node?
-   Answer: A Python function that receives the state and returns the keys it updates.
+   Answer: A function that takes the state and returns the part it changes.
 2. What is an edge?
-   Answer: A link that says which node runs next. Normal edges are fixed; conditional edges choose the next node at runtime with a routing function.
+   Answer: It says which node runs next. It can be fixed, or conditional when a function chooses the next node.
 3. What is `START`?
-   Answer: The virtual entry point; its edge decides the first node to run.
+   Answer: The entry point of the graph (not a real node); its edge gives the first node to run.
 4. What is `END`?
-   Answer: The virtual exit point; reaching it stops the graph and returns the final state.
+   Answer: The exit point. When we reach it the graph stops and returns the final state.
 5. Why is the state passed between nodes?
-   Answer: It is the only shared memory between nodes. Each node reads previous results and adds its own, which keeps nodes independent, makes the data flow explicit, and allows checkpointing and memory.
+   Answer: The nodes do not call each other, so the state is the only way to share information. Each node reads what the others wrote and adds its own result. It also makes the run easy to inspect, and it is what the checkpointer saves for the memory.
 
 ### Router evaluation
 Where did the router fail (if anywhere)? What would make the routing more robust?
 
-Answer: In our run the router made no mistake (6/6 = 100%), but the test set is small and the questions are clear-cut. The router depends on a free-text label from the LLM and a substring check, so it can potentially fail on ambiguous questions (e.g. a Python function that computes a derivative), on unexpected spellings ("Mathematics.", "AI", "math"), and the silent fallback to `ai` hides errors. More robust options: structured output with a `Literal`/enum type, validation of the label with logging of fallbacks, few-shot examples for borderline cases, `temperature=0`, and a larger labelled test set with per-category accuracy.
+Answer: It did not fail in our run (6/6 on the evaluation, 3/3 in the Part VI demo), but the questions are short and clearly in one category. The weak point is that the LLM returns free text, we only check if a word is inside it, and anything unknown silently goes to the `ai` branch. A question like "write a Python function that computes a derivative" could go either way. Improvements: structured output with a `Literal` of the three categories, checking the label and logging when the fallback is used, a few examples in the prompt for borderline cases, and a bigger labelled test set with accuracy per category.
 
 ## 3. Design choices (capstone)
 - **Classifier → specialized agents**: one node per category (COURSES, PROGRAMMING, MATHEMATICS, ADMINISTRATION, GENERAL), all built by the same `make_agent` factory with a different system prompt.
