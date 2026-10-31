@@ -61,7 +61,7 @@ Capstone demo:
 | What is today's date? | GENERAL | current_datetime | Saturday, October 31, 2026 (correct) |
 | (empty question) | EMPTY | none | Fallback message asking for a question |
 | My name is Ahmed. / What is my name? | GENERAL | none | "Your name is Ahmed." (memory works) |
-| Compute (15 + 27) * 3 using the calculator. | MATHEMATICS | calculator | 126 (correct, full trace shown in the notebook) |
+| Compute (15 + 27) * 3 using the calculator. | (not printed) | calculator | 126 (correct, full trace shown in the notebook) |
 
 All five categories, both tools, memory and the empty-input error case behave as designed.
 
