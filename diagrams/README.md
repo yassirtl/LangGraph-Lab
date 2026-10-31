@@ -1,6 +1,6 @@
 # Architecture diagrams
 
-Generated with `graph.get_graph().draw_mermaid()`.
+Exported from the notebook with `graph.get_graph().draw_mermaid()`.
 
 ## Router (Parts V-VI)
 
