@@ -10,7 +10,7 @@ PhD lab on agentic workflows with LangChain and LangGraph.
 | `langgraph_lab.ipynb` | Notebook with code, outputs and answers |
 | `langgraph_lab_Statement.ipynb` | Original lab statement |
 | `report.md` | Short report answering the conceptual questions |
-| `diagrams/` | Architecture diagram of the capstone assistant |
+| `diagrams/` | Architecture diagrams (Mermaid, rendered on GitHub) |
 | `screenshots/` | Screenshots showing execution |
 
 ## Contents
@@ -42,6 +42,15 @@ Design choices:
 - After a tool call, control goes back to the agent that asked for it.
 
 ## How to run
+### Google Colab
 1. Open `langgraph_lab.ipynb` in Google Colab (CPU runtime is enough).
 2. Add `OPENAI_API_KEY` in the Colab Secrets panel (key icon), or paste it when asked.
 3. Run the cells in order.
+
+### Locally with Jupyter
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install jupyter pandas langgraph langchain langchain-openai langchain-community
+export OPENAI_API_KEY=...
+jupyter notebook langgraph_lab.ipynb
+```
