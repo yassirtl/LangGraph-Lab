@@ -47,7 +47,7 @@ Design choices:
 | Router evaluation (6 questions) | 6/6 = 100% |
 | Tool agent | Calls the calculator for arithmetic, answers directly otherwise |
 | Memory | Remembers the user's name in the same thread, not in another one |
-| Capstone (6 demo queries) | All 5 categories routed correctly, both tools used, empty input handled |
+| Capstone (6 demo queries) | All 5 categories routed correctly, calculator and date tool used, empty input handled |
 
 Details in [`report.md`](report.md); all outputs are saved in the notebook.
 

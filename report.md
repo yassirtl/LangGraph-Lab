@@ -31,10 +31,13 @@ Where did the router fail (if anywhere)? What would make the routing more robust
 Answer: It did not fail in our run (6/6 on the evaluation, 3/3 in the Part VI demo), but the questions are short and clearly in one category. The weak point is that the LLM returns free text, we only check if a word is inside it, and anything unknown silently goes to the `ai` branch. A question like "write a Python function that computes a derivative" could go either way. Improvements: structured output with a `Literal` of the three categories, checking the label and logging when the fallback is used, a few examples in the prompt for borderline cases, and a bigger labelled test set with accuracy per category.
 
 ## 3. Design choices (capstone)
-- **Classifier → specialized agents**: one node per category (COURSES, PROGRAMMING, MATHEMATICS, ADMINISTRATION, GENERAL), all built by the same `make_agent` factory with a different system prompt.
-- **Tools**: a safe calculator based on `ast` (no `eval()`, so no arbitrary code execution) and a date/time tool. Every agent can call them; after the tool runs, control returns to the same agent (`route_after_tools`).
-- **Memory**: `MemorySaver` checkpointer with a `thread_id`; different threads have separate memories.
-- **Error handling**: empty input → fallback node; unknown label → GENERAL; API error in the classifier → fallback; API error in an agent → apology message; invalid tool calls → `ToolNode(handle_tool_errors=True)` returns the error to the agent instead of crashing.
+The classifier sends each question to one of five agents (courses, programming, mathematics, administration, general). The five agents are created by the same `make_agent` function and only differ by their system prompt, so a fix or a new agent only needs one change.
+
+All agents share two tools: a calculator and a date/time tool. The calculator parses the expression with `ast` and only accepts numbers and arithmetic operators, because the `eval()` version from the statement would run any Python code coming from the model. After a tool runs, `route_after_tools` reads the category in the state to send the result back to the agent that asked for it.
+
+Memory uses a `MemorySaver` checkpointer, with one `thread_id` per conversation.
+
+For errors, we tried to cover each step: an empty question goes to a fallback node without calling the LLM, an API error in the classifier also goes to the fallback, an API error in an agent returns a short apology, an unknown label from the classifier is treated as GENERAL, and `ToolNode(handle_tool_errors=True)` gives tool errors back to the agent instead of stopping the graph.
 
 Diagram: see [`diagrams/README.md`](diagrams/README.md).
 
@@ -72,3 +75,5 @@ Note: the PNG rendering of the tool agent and capstone graphs failed in Colab (t
 - The router uses free text; structured output would make it more reliable.
 - The administration and course agents have no access to real university data; a database or document retrieval tool would avoid generic answers.
 - Each question costs at least two LLM calls (classifier + agent), which adds latency and cost.
+- In the demo all six questions use the same `thread_id`, so they end up in one conversation and each call sends the previous answers again. Unrelated questions should use separate threads, or the history should be trimmed.
+- `MemorySaver` keeps everything in RAM, so the memory is lost when the runtime restarts (`SqliteSaver` would keep it).
