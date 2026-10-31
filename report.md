@@ -28,7 +28,7 @@ A conventional LLM chain runs a fixed sequence of steps (prompt → model → pa
 ### Router evaluation
 Where did the router fail (if anywhere)? What would make the routing more robust?
 
-Answer: The router depends on a free-text label from the LLM and a substring check, so it can fail on ambiguous questions (e.g. a Python function that computes a derivative), on unexpected spellings ("Mathematics.", "AI", "math"), and the silent fallback to `ai` hides errors. More robust options: structured output with a `Literal`/enum type, validation of the label with logging of fallbacks, few-shot examples for borderline cases, `temperature=0`, and a larger labelled test set with per-category accuracy.
+Answer: The router depends on a free-text label from the LLM and a substring check, so it can potentially fail on ambiguous questions (e.g. a Python function that computes a derivative), on unexpected spellings ("Mathematics.", "AI", "math"), and the silent fallback to `ai` hides errors. More robust options: structured output with a `Literal`/enum type, validation of the label with logging of fallbacks, few-shot examples for borderline cases, `temperature=0`, and a larger labelled test set with per-category accuracy.
 
 ## 3. Design choices (capstone)
 - **Classifier → specialized agents**: one node per category (COURSES, PROGRAMMING, MATHEMATICS, ADMINISTRATION, GENERAL), all built by the same `make_agent` factory with a different system prompt.
