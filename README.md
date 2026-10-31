@@ -41,6 +41,24 @@ Design choices:
 - `ToolNode(handle_tool_errors=True)` returns tool errors to the agent instead of crashing the graph.
 - After a tool call, control goes back to the agent that asked for it.
 
+## Results
+| Experiment | Result |
+|---|---|
+| Router evaluation (6 questions) | 6/6 = 100% |
+| Tool agent | Calls the calculator for arithmetic, answers directly otherwise |
+| Memory | Remembers the user's name in the same thread, not in another one |
+| Capstone (6 demo queries) | All 5 categories routed correctly, both tools used, empty input handled |
+
+Details in [`report.md`](report.md); all outputs are saved in the notebook.
+
+## Screenshots
+| | |
+|---|---|
+| First graph | ![](screenshots/01_first_graph.png) |
+| LLM connection | ![](screenshots/02_llm_connection.png) |
+| Router graph | ![](screenshots/07_router_graph.png) |
+| Router evaluation | ![](screenshots/08_evaluation.png) |
+
 ## How to run
 ### Google Colab
 1. Open `langgraph_lab.ipynb` in Google Colab (CPU runtime is enough).
