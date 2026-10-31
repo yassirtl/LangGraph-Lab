@@ -56,9 +56,9 @@ Capstone demo:
 |---|---|---|---|
 | What topics are usually covered in a machine learning course? | COURSES | none | Structured course outline |
 | Write a Python function that computes the factorial of n. | PROGRAMMING | none | Python function with explanation |
-| What is 125 * 38 + 17? | MATHEMATICS | calculator | 4767 (correct) |
+| What is 125 * 38 + 17? | MATHEMATICS | calculator expected (only the final answer is printed) | 4767 (correct) |
 | How do I request an enrollment certificate? | ADMINISTRATION | none | Generic steps, advises contacting the office |
-| What is today's date? | GENERAL | current_datetime | Saturday, October 31, 2026 (correct) |
+| What is today's date? | GENERAL | current_datetime (the model cannot know the date otherwise) | Saturday, October 31, 2026 (correct) |
 | (empty question) | EMPTY | none | Fallback message asking for a question |
 | My name is Ahmed. / What is my name? | GENERAL | none | "Your name is Ahmed." (memory works) |
 | Compute (15 + 27) * 3 using the calculator. | (not printed) | calculator | 126 (correct, full trace shown in the notebook) |
