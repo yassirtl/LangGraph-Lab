@@ -28,7 +28,7 @@ A conventional LLM chain runs a fixed sequence of steps (prompt → model → pa
 ### Router evaluation
 Where did the router fail (if anywhere)? What would make the routing more robust?
 
-Answer: The router depends on a free-text label from the LLM and a substring check, so it can potentially fail on ambiguous questions (e.g. a Python function that computes a derivative), on unexpected spellings ("Mathematics.", "AI", "math"), and the silent fallback to `ai` hides errors. More robust options: structured output with a `Literal`/enum type, validation of the label with logging of fallbacks, few-shot examples for borderline cases, `temperature=0`, and a larger labelled test set with per-category accuracy.
+Answer: In our run the router made no mistake (6/6 = 100%), but the test set is small and the questions are clear-cut. The router depends on a free-text label from the LLM and a substring check, so it can potentially fail on ambiguous questions (e.g. a Python function that computes a derivative), on unexpected spellings ("Mathematics.", "AI", "math"), and the silent fallback to `ai` hides errors. More robust options: structured output with a `Literal`/enum type, validation of the label with logging of fallbacks, few-shot examples for borderline cases, `temperature=0`, and a larger labelled test set with per-category accuracy.
 
 ## 3. Design choices (capstone)
 - **Classifier → specialized agents**: one node per category (COURSES, PROGRAMMING, MATHEMATICS, ADMINISTRATION, GENERAL), all built by the same `make_agent` factory with a different system prompt.
@@ -39,9 +39,33 @@ Answer: The router depends on a free-text label from the LLM and a substring che
 Diagram: see [`diagrams/README.md`](diagrams/README.md).
 
 ## 4. Results
-To fill in after the notebook has been run with outputs (routing accuracy, demo queries, memory test, tool trace).
+Model: `gpt-4o-mini`, `temperature=0`, LangGraph 1.2.19, LangChain 1.4.7 (Google Colab).
 
-Answer:
+| Experiment | Result |
+|---|---|
+| First graph (Part II) | `{'message': 'Hello LangGraph!', 'response': 'Agent received: Hello LangGraph!'}`, as expected |
+| Router demo (Part VI) | 3/3 routed correctly (mathematics, programming, artificial_intelligence) |
+| Router evaluation | 6/6 = 100% accuracy, 2 to 7.6 s per question |
+| Tool agent (Part VIII) | "125 * 38" → calculator called → 4750; "capital of Morocco" → no tool, answers Rabat |
+| Safe calculator | `25 * 4 + 10` → 110; `__import__('os')` → Invalid expression |
+| Memory (Part IX) | Without checkpointer the name is forgotten; with `MemorySaver` it answers "Your name is Ahmed"; another thread does not know it |
+
+Capstone demo:
+
+| Query | Category | Tool | Result |
+|---|---|---|---|
+| What topics are usually covered in a machine learning course? | COURSES | none | Structured course outline |
+| Write a Python function that computes the factorial of n. | PROGRAMMING | none | Python function with explanation |
+| What is 125 * 38 + 17? | MATHEMATICS | calculator | 4767 (correct) |
+| How do I request an enrollment certificate? | ADMINISTRATION | none | Generic steps, advises contacting the office |
+| What is today's date? | GENERAL | current_datetime | Saturday, October 31, 2026 (correct) |
+| (empty question) | EMPTY | none | Fallback message asking for a question |
+| My name is Ahmed. / What is my name? | GENERAL | none | "Your name is Ahmed." (memory works) |
+| Compute (15 + 27) * 3 using the calculator. | MATHEMATICS | calculator | 126 (correct, full trace shown in the notebook) |
+
+All five categories, both tools, memory and the empty-input error case behave as designed.
+
+Note: the PNG rendering of the tool agent and capstone graphs failed in Colab (the mermaid.ink service returned HTTP 400), so the notebook prints the Mermaid source instead; the rendered diagrams are in [`diagrams/README.md`](diagrams/README.md).
 
 ## 5. Limitations and possible improvements
 - The classifier only looks at the last message, so a follow-up such as "and the second one?" may be misrouted.
